@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.messaging)
 
     // Compose
     val composeBom = platform(libs.androidx.compose.bom)
