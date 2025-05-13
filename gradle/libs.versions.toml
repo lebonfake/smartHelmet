@@ -15,6 +15,7 @@ constraintlayout = "2.2.0"
 navigation-compose = "2.7.7"
 firebase-bom = "33.0.0"
 firebase-database = "20.3.0"
+firebaseFirestoreKtx = "25.1.4"
 
 [libraries]
 # Compose
@@ -49,6 +50,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
