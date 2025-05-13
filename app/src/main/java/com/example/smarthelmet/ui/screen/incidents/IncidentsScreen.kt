@@ -59,7 +59,7 @@ fun IncidentsScreen(viewModel: IncidentsViewModel = viewModel()) {
 
 @Composable
 fun IncidentItem(incident: Incident) {
-    Log.d("search", "IncidentItem: ${incident}")
+    Log.d("search", "IncidentItem: $incident")
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -76,21 +76,16 @@ fun IncidentItem(incident: Incident) {
                 style = MaterialTheme.typography.bodyMedium
             )
 
-            // Format timestamp for better readability
-            val formattedTime = try {
-                val timestamp = incident.time?.toLongOrNull() ?: 0L
-                SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-                    .format(Date(timestamp))
-            } catch (e: Exception) {
-                incident.time
-            }
-
             Text(
-                text = "Time: $formattedTime",
+                text = "Time: ${incident.getFormattedTime()}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
                 text = "Location: ${incident.latitude}, ${incident.longitude}",
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = "Severity: ${incident.severity}",
                 style = MaterialTheme.typography.bodySmall
             )
         }

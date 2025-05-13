@@ -17,51 +17,15 @@ class IncidentRepository {
     private val incidentsRef = database.getReference("incidents")
 
     init {
-        Log.d("Firebase", "Connected to database: ${database.reference}")
+        Log.d("Firebase", "Connected to database URL: ${database.reference}")
+        Log.d("Firebase", "Using reference path: $incidentsRef")
     }
 
     /**
-     * Adds an incident to Realtime Database with robust error handling.
-     *
-     * @param incident The incident object to store in the database
-     * @param onSuccess Callback triggered when the operation completes successfully
-     * @param onFailure Callback triggered when the operation fails, with exception details
-     */
-    fun addIncident(incident: Incident, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
-        try {
-            // Format helmet_id with leading zeros (e.g., helmet_001)
-            val helmetId = incident.helmetId ?: 0
-            val formattedHelmetId = String.format("helmet_%03d", helmetId)
-
-            // Generate incident ID if not present
-            val incidentId = incident.id ?: (System.currentTimeMillis() % 1000).toInt()
-            val formattedIncidentId = String.format("incident_%03d", incidentId)
-
-            // Update the ID in the incident object
-            incident.id = incidentId
-
-            // Create the reference with the nested path
-            val nestedRef = incidentsRef.child(formattedHelmetId).child(formattedIncidentId)
-
-            nestedRef.setValue(incident)
-                .addOnSuccessListener {
-                    Log.d("RealtimeDB", "Added incident at: $formattedHelmetId/$formattedIncidentId")
-                    onSuccess()
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("RealtimeDB", "Failed to add incident: ${exception.message}", exception)
-                    onFailure(exception)
-                }
-        } catch (e: Exception) {
-            Log.e("RealtimeDB", "Unexpected error: ${e.message}", e)
-            onFailure(e)
-        }
-    }
-
-    /**
-     * Registers a real-time listener for incidents data.
+     * Registers a real-time listener for incidents data for a specific helmet.
      * This will continuously notify the caller of any changes in the incidents.
      *
+     * @param helmetId The ID of the helmet to fetch incidents for
      * @param onData Callback function that receives the updated list of incidents
      * @param onError Callback function that receives any database errors
      * @return ValueEventListener to remove the listener when no longer needed
@@ -71,16 +35,33 @@ class IncidentRepository {
         onData: (List<Incident>) -> Unit,
         onError: (Exception) -> Unit
     ): ValueEventListener {
-        val formattedHelmetId = String.format("helmet_%03d", helmetId)
-        Log.d("RealtimeDB", "Fetching incidents for $formattedHelmetId")
+        Log.d("RealtimeDB", "Fetching incidents for helmet ID: $helmetId")
+        val helmetIdStr = helmetId.toString()
 
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val incidents = mutableListOf<Incident>()
 
                 for (incidentSnapshot in snapshot.children) {
-                    val incident = incidentSnapshot.getValue(Incident::class.java)
-                    incident?.let { incidents.add(it) }
+                    try {
+                        // Extract incident ID from key (incident_001 -> 1)
+                        val incidentIdStr = incidentSnapshot.key?.replace("incident_", "") ?: ""
+                        val incidentId = incidentIdStr.toIntOrNull()
+
+                        // Get the incident
+                        val incident = incidentSnapshot.getValue(Incident::class.java)
+
+                        // Only include incidents for the requested helmet
+                        if (incident?.helmetId == helmetIdStr) {
+                            // Set the ID from the key if it's available
+                            incident.id = incidentId
+
+                            incidents.add(incident)
+                            Log.d("RealtimeDB", "Found incident for helmet $helmetId: $incident")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("RealtimeDB", "Error processing incident: ${e.message}", e)
+                    }
                 }
 
                 onData(incidents)
@@ -92,7 +73,7 @@ class IncidentRepository {
             }
         }
 
-        incidentsRef.child(formattedHelmetId).addValueEventListener(listener)
+        incidentsRef.addValueEventListener(listener)
         return listener
     }
 
@@ -112,12 +93,30 @@ class IncidentRepository {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val incidents = mutableListOf<Incident>()
 
-                // First level: helmet_XXX nodes
-                for (helmetSnapshot in snapshot.children) {
-                    // Second level: incident_XXX nodes
-                    for (incidentSnapshot in helmetSnapshot.children) {
+                for (incidentSnapshot in snapshot.children) {
+                    try {
+                        // Extract incident ID from key (incident_001 -> 1)
+                        val incidentIdStr = incidentSnapshot.key?.replace("incident_", "") ?: ""
+                        val incidentId = incidentIdStr.toIntOrNull()
+
+                        // Log raw data for debugging
+                        Log.d("RealtimeDB", "Raw data for ${incidentSnapshot.key}: ${incidentSnapshot.value}")
+
+                        // Get the incident and set ID from the key
                         val incident = incidentSnapshot.getValue(Incident::class.java)
-                        incident?.let { incidents.add(it) }
+                        incident?.let {
+                            it.id = incidentId
+
+                            Log.d("TimeDebug","Raw time value from DB: ${it.time}")
+                            Log.d("TimeDebug","Parsed time value: ${it.getFormattedTime()}")
+
+                            incidents.add(it)
+
+                            // Log the incident after setting ID
+                            Log.d("RealtimeDB", "Processed incident: $incident")
+                        }
+                    } catch (e: Exception) {
+                        Log.e("RealtimeDB", "Error processing incident: ${e.message}", e)
                     }
                 }
 

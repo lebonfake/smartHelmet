@@ -3,7 +3,6 @@ package com.example.smarthelmet.ui.screen.incidents
 import android.util.Log
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smarthelmet.data.repository.IncidentRepository
@@ -27,34 +26,6 @@ class IncidentsViewModel(
         Log.d("IncidentsViewModel", "ViewModel initialized")
         loadIncidents()
         //addTestIncident() // For testing
-    }
-
-    public fun addTestIncident() {
-        viewModelScope.launch {
-            // Create a test Incident instance
-            val testIncident = Incident(
-                id = 1,
-                helmetId = 1,
-                time = System.currentTimeMillis().toString(),
-                date = System.currentTimeMillis().toString(),
-                latitude = 12.0,
-                longitude = 12.0
-            )
-
-            // Log before adding
-            Log.d("IncidentsViewModel", "Adding test incident: $testIncident")
-
-            repository.addIncident(
-                incident = testIncident,
-                onSuccess = {
-                    Log.d("IncidentsViewModel", "Incident added successfully")
-
-                },
-                onFailure = { e ->
-                    Log.e("IncidentsViewModel", "Error adding incident: ${e.message}")
-                }
-            )
-        }
     }
 
     private fun loadIncidents() {
