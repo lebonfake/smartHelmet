@@ -27,7 +27,7 @@ class IncidentsViewModel(
             // Create a test Incident instance
             val testIncident = Incident(
                 id = 1,
-                helmet_id = 1,
+                helmetId = 1,
                 time = System.currentTimeMillis().toString(),
                 date = System.currentTimeMillis().toString(),
                 latitude = 12.0,
@@ -54,7 +54,7 @@ class IncidentsViewModel(
         viewModelScope.launch {
             Log.d("IncidentsViewModel", "Fetching incidents from repository")
 
-            repository.getIncidents(
+            repository.getAllIncidents(
                 onData = { list ->
                     _incidents.value = list
                     Log.d("IncidentsViewModel", "Fetched incidents successfully: ${list.size} items")

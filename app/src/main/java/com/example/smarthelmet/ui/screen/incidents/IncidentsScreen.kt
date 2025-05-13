@@ -60,7 +60,7 @@ fun IncidentItem(incident: Incident) {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Helmet ID: ${incident.helmet_id}",
+                text = "Helmet ID: ${incident.helmetId}",
                 style = MaterialTheme.typography.bodyMedium
             )
 
