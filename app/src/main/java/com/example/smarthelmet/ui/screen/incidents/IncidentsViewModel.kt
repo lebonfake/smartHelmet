@@ -1,6 +1,7 @@
 
 package com.example.smarthelmet.ui.screen.incidents
 import android.util.Log
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
@@ -19,7 +20,7 @@ class IncidentsViewModel(
     val incidents: StateFlow<List<Incident>> = _incidents
 
     val helmetId =  mutableStateOf("")
-    val sortBy =  mutableStateOf(0) // 0 = Newest, 1 = Oldest
+    val sortBy =  mutableIntStateOf(0) // 0 = Newest, 1 = Oldest
 
 
     init {
@@ -77,7 +78,7 @@ class IncidentsViewModel(
         Log.d("search", "filteredIncidents: ${helmetId} ")
        var result =list
             .filter {
-                helmetId?.isBlank() == true || it.helmet_id.toString() == helmetId
+                helmetId?.isBlank() == true || it.helmetId.toString() == helmetId
             }
         if (sortedBy == 1)
             return  list.reversed()
