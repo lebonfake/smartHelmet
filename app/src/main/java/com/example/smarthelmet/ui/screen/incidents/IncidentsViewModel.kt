@@ -1,6 +1,8 @@
 
 package com.example.smarthelmet.ui.screen.incidents
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.smarthelmet.data.repository.IncidentRepository
@@ -16,13 +18,17 @@ class IncidentsViewModel(
     private val _incidents = MutableStateFlow<List<Incident>>(emptyList())
     val incidents: StateFlow<List<Incident>> = _incidents
 
+    val helmetId =  mutableStateOf("")
+    val sortBy =  mutableStateOf(0) // 0 = Newest, 1 = Oldest
+
+
     init {
         Log.d("IncidentsViewModel", "ViewModel initialized")
         loadIncidents()
         //addTestIncident() // For testing
     }
 
-    private fun addTestIncident() {
+    public fun addTestIncident() {
         viewModelScope.launch {
             // Create a test Incident instance
             val testIncident = Incident(
@@ -57,6 +63,7 @@ class IncidentsViewModel(
             repository.getIncidents(
                 onData = { list ->
                     _incidents.value = list
+
                     Log.d("IncidentsViewModel", "Fetched incidents successfully: ${list.size} items")
                 },
                 onError = { err ->
@@ -65,4 +72,21 @@ class IncidentsViewModel(
             )
         }
     }
+
+    public fun filteredIncidents( helmetId : String? , sortedBy:Int? , list : List<Incident>) :List<Incident>{
+        Log.d("search", "filteredIncidents: ${helmetId} ")
+       var result =list
+            .filter {
+                helmetId?.isBlank() == true || it.helmet_id.toString() == helmetId
+            }
+        if (sortedBy == 1)
+            return  list.reversed()
+
+        Log.d("search", "filteredIncidents: ${list}")
+        return result
+
+    }
+
+
+
 }

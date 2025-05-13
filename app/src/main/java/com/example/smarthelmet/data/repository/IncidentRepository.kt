@@ -4,6 +4,7 @@ import android.util.Log
 import com.example.smarthelmet.model.Incident
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.toObject
 
 /**
@@ -53,7 +54,10 @@ class IncidentRepository {
         onError: (Exception) -> Unit
     ): ListenerRegistration {
         Log.d("Firestore", "Setting up real-time listener")
-        return incidentsCollection.addSnapshotListener { snapshot, exception ->
+        return incidentsCollection
+            .orderBy("date", Query.Direction.DESCENDING)
+            .orderBy("time", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, exception ->
             if (exception != null) {
                 Log.e("Firestore", "Incident listener error: ${exception.message}", exception)
                 onError(exception)
