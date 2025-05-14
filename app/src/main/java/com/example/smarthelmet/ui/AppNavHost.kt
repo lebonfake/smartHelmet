@@ -4,10 +4,12 @@ package com.example.smarthelmet.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.smarthelmet.ui.screen.BottomNavBar
 import com.example.smarthelmet.ui.screen.HelmetScreen
@@ -21,15 +23,19 @@ fun AppNavHost() {
 
     // Create a shared ViewModel instance that will be reused across navigation
     val incidentsViewModel: IncidentsViewModel = viewModel()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val showBottomBar = currentRoute != "splash"
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(navController = navController)
+            if(showBottomBar){
+            BottomNavBar(navController = navController)}
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = BottomNavigationItem.Incidents.title,
+            startDestination = "splash",
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(BottomNavigationItem.Incidents.title) {
@@ -38,6 +44,9 @@ fun AppNavHost() {
             }
             composable(BottomNavigationItem.Helmets.title) {
                 HelmetScreen()
+            }
+            composable("splash"){
+                SplashScreen(navController)
             }
         }
     }
