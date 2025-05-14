@@ -40,8 +40,6 @@ fun SearchFilter(helmetId: MutableState<String>, sortByDate: MutableState<Int>) 
                 fontWeight = FontWeight.Bold
             )
 
-            Divider()
-
             // Helmet ID search field
             OutlinedTextField(
                 value = helmetId.value,

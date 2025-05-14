@@ -33,8 +33,11 @@ fun IncidentsScreen(viewModel: IncidentsViewModel = viewModel()) {
       SearchFilter(helmetId,sortBy)
 
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp),
+            contentPadding = PaddingValues(0.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(filteredIncident) { incident ->

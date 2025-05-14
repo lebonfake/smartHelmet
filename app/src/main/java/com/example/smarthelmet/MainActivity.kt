@@ -16,12 +16,31 @@ import androidx.core.content.ContextCompat
 import com.example.smarthelmet.ui.AppNavHost
 import com.google.firebase.FirebaseApp
 import android.Manifest
+import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         FirebaseApp.initializeApp(this)
+
+        // Obtain the FCM registration token
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                println("Fetching FCM registration token failed: ${task.exception}")
+                return@addOnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+            println("FCM Registration Token: $token")
+
+            // Save the token to your database
+            saveTokenToDatabase(token)
+        }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -34,22 +53,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-
         setContent {
             MaterialTheme{
                 AppNavHost()
             }
-
         }
-
-
     }
 }
-@Composable
-fun Greeting(name: String) {
-    Text(
-        text = "Hello, $name!",
-        style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier.padding(16.dp)
-    )
+
+private fun saveTokenToDatabase(token: String) {
+    // Save to Firebase Database so your ESP8266 can retrieve it
+    FirebaseDatabase.getInstance().getReference("fcm_tokens")
+        .child("my_device")
+        .setValue(token)
+        .addOnSuccessListener {
+            Log.d("FCM", "Token saved to database")
+        }
+        .addOnFailureListener { e ->
+            Log.e("FCM", "Failed to save token: ${e.message}")
+        }
 }
