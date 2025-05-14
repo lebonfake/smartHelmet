@@ -2,6 +2,9 @@ package com.example.smarthelmet.model
 
 import android.util.Log
 import com.google.firebase.database.PropertyName
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class Incident(
     var id: Int? = null,
@@ -12,7 +15,7 @@ data class Incident(
 
     @get:PropertyName("time")
     @set:PropertyName("time")
-    var time: String? = null,
+    var time: Long? = null,
 
     @get:PropertyName("latitude")
     @set:PropertyName("latitude")
@@ -28,33 +31,54 @@ data class Incident(
 ) {
     // Helper method to get a nicely formatted time string
     fun getFormattedTime(): String {
-        if (time.isNullOrEmpty()) return "Unknown time"
+        if (time == null) return "Unknown time"
 
         return try {
-            // First try parsing as a long timestamp (milliseconds since epoch)
-            val timestampLong = time!!.toLongOrNull()
-            if (timestampLong != null) {
-                java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-                    .format(java.util.Date(timestampLong))
-            }
-            // Next try parsing as ISO 8601 format (2023-05-15T10:30:00Z)
-            else if (time!!.contains("T") && (time!!.contains("Z") || time!!.contains("+"))) {
-                val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.getDefault())
-                inputFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
-
-                val parsedDate = inputFormat.parse(time!!)
-                val outputFormat = java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault())
-                outputFormat.timeZone = java.util.TimeZone.getDefault() // Convert to local time zone
-
-                parsedDate?.let { outputFormat.format(it) } ?: "Invalid date"
-            }
-            // If neither works, return the raw string
-            else {
-                time!!
+            // Convert Unix time (seconds) to milliseconds for Date
+            val date = Date(time!! * 1000)
+            
+            // Format the date
+            SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(date)
+        } catch (e: Exception) {
+            Log.e("Incident", "Error formatting Unix timestamp: $time - ${e.message}")
+            "Error: $time"
+        }
+    }
+    
+    /**
+     * Returns the severity level as a user-friendly string
+     */
+    fun getSeverityText(): String {
+        return when (severity) {
+            1 -> "Minor"
+            2 -> "Moderate" 
+            3 -> "Serious"
+            4 -> "Severe"
+            5 -> "Critical"
+            else -> "Unknown"
+        }
+    }
+    
+    /**
+     * Returns a relative time description (e.g., "5 minutes ago")
+     */
+    fun getRelativeTime(): String {
+        if (time == null) return "Unknown time"
+        
+        try {
+            val now = System.currentTimeMillis() / 1000 // Current Unix time in seconds
+            val diff = now - time!! // Difference in seconds
+            
+            return when {
+                diff < 60 -> "Just now"
+                diff < 60 * 60 -> "${diff / 60} minutes ago"
+                diff < 24 * 60 * 60 -> "${diff / (60 * 60)} hours ago"
+                diff < 48 * 60 * 60 -> "Yesterday"
+                else -> "${diff / (24 * 60 * 60)} days ago"
             }
         } catch (e: Exception) {
-            Log.e("Incident", "Error parsing time: ${time} - ${e.message}")
-            "Error: ${time}"
+            Log.e("Incident", "Error calculating relative time: $time - ${e.message}")
+            return "Unknown time"
         }
     }
 }
