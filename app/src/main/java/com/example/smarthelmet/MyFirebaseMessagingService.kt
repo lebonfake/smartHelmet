@@ -68,7 +68,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
     }
 
     override fun onNewToken(token: String) {
-        Log.d(TAG, "Refreshed token: $token")
+        Log.d("hmar", "Refreshed token: $token")
 
         // Send the new FCM token to your server to manage it
 
