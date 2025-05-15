@@ -18,6 +18,7 @@ fun BottomNavBar(navController: NavHostController) {
     val currentRoute = currentBackStackEntry.value?.destination?.route
 
     NavigationBar {
+
         items.forEach { screen ->
             NavigationBarItem(
                 icon = {if(currentRoute == screen.title){
@@ -45,6 +46,8 @@ fun BottomNavBar(navController: NavHostController) {
                         }
                     }
                 }
+
+
             )
         }
     }
