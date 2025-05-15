@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import android.util.Log
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.sp
 import com.example.smarthelmet.R
 
 @Composable
@@ -48,7 +49,16 @@ fun IncidentsScreen(viewModel: IncidentsViewModel = viewModel()) {
         println("IncidentsScreen launched with ${incidents.size} incidents")
     }
     
-    Column {
+    Column (modifier = Modifier.padding(12.dp)){
+    Text(text = "Incidents",
+        color = Color(0xFF47A0F6) ,
+        fontSize = 30.sp,
+        style = MaterialTheme.typography.titleLarge,
+        fontWeight = FontWeight.Bold)
+
+    Spacer(modifier = Modifier
+        .fillMaxWidth()
+        .height(12.dp))
       SearchFilter(helmetId,sortBy)
 
         LazyColumn(
@@ -90,10 +100,13 @@ fun IncidentItem(incident: Incident) {
     val MediumBlue = Color(0xFFADD8FF)
 
     // Determine severity color
-    val severityColor = when (incident.severity.toString()) {
-        "high" -> Color(0xFFE57373) // Red for high severity
-        "medium" -> Color(0xFFFFD54F) // Amber for medium
-        "low" -> Color(0xFF81C784) // Green for low
+    val severityColor = when (incident.getSeverityText()) {
+        "Critical" -> Color(0xFFE57373) // Red for high severity
+        "Severe" -> Color(0xFFFFD54F)
+        "Serious" -> Color(0xFFFFD54F) // Amber for medium
+        "Moderate"-> Color(0xFF81C784)
+        "Minor"-> Color(0xFF81C784) // Green for low
+
         else -> Color.Gray // Default
     }
 
@@ -160,7 +173,7 @@ fun IncidentItem(incident: Incident) {
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Text(
-                        text = incident.severity.toString(),
+                        text = incident.getSeverityText(),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,

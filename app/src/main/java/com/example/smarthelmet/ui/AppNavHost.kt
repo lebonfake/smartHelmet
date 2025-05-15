@@ -11,8 +11,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.smarthelmet.data.repository.HelmetRepository
 import com.example.smarthelmet.ui.screen.BottomNavBar
-import com.example.smarthelmet.ui.screen.HelmetScreen
+import com.example.smarthelmet.ui.screen.Helmets.HelmetScreen
+import com.example.smarthelmet.ui.screen.Helmets.HelmetsViewModel
 import com.example.smarthelmet.ui.screen.incidents.IncidentsScreen
 import com.example.smarthelmet.ui.screen.incidents.IncidentsViewModel
 
@@ -43,7 +45,7 @@ fun AppNavHost() {
                 IncidentsScreen()
             }
             composable(BottomNavigationItem.Helmets.title) {
-                HelmetScreen()
+                HelmetScreen(HelmetsViewModel(HelmetRepository()))
             }
             composable("splash"){
                 SplashScreen(navController)
