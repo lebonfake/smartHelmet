@@ -17,8 +17,10 @@ sealed class  BottomNavigationItem(
 ){
     object  Incidents : BottomNavigationItem("Incidents" ,R.drawable.incidents_filled , R.drawable.incidents_outlined, false);
     object  Helmets : BottomNavigationItem("Helmets" , R.drawable.helmet_filled , R.drawable.helmet_outlined, false);
+    object  Workers : BottomNavigationItem("Workers" , R.drawable.helmet_filled , R.drawable.helmet_outlined, false);
+
     companion object {
-        val bottomNavItems = listOf(Incidents, Helmets)
+        val bottomNavItems = listOf(Incidents, Helmets,Workers)
     }
 
 
