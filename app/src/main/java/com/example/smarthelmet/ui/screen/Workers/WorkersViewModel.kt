@@ -13,11 +13,8 @@ class WorkersViewModel(val  workerRepository: WorkerRepository) : ViewModel() {
     var workers = MutableStateFlow<List<Worker>>(emptyList())
 
     init {
-      /*  viewModelScope.launch {
-            var result = workerRepository.addWorker(Worker(1,"fadli mohamed",21,"sick"))
 
-        }*/
-         getAllWorker()
+       getAllWorker()
     }
 
     fun getAllWorker(){
@@ -25,5 +22,29 @@ class WorkersViewModel(val  workerRepository: WorkerRepository) : ViewModel() {
             workers.value = workerRepository.getAllWorkers()
         }
         Log.d("worker", "getAllWorker viewmodel: ${workers.value} ")
+    }
+
+    fun onAddWorker(worker : Worker){
+
+
+        viewModelScope.launch {
+            val workerId = workerRepository.addWorker(worker) // Await the result
+            if (workerId != null) {
+                val newWorker = worker.copy(id = workerId) // Create a new Worker object with the ID
+                // Assuming workers is a MutableStateFlow
+                val currentWorkers = workers.value // Get the current list
+                workers.value = currentWorkers + newWorker // Create a new list with the added worker and update the StateFlow
+            } else {
+
+
+            }
+
+        }
+    }
+
+    fun deleteAllWorkers()
+    {
+        viewModelScope.launch { workerRepository.deleteAllWorkers() }
+
     }
 }

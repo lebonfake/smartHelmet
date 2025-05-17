@@ -22,9 +22,11 @@ class WorkerRepository {
      */
     suspend fun addWorker(worker: Worker): String {
         return try {
-            val documentReference = workerCollection.add(worker).await() // Use .await() for coroutine support
-            Log.d("worker", "addWorker: $documentReference ")
-            documentReference.id // Return the Firestore-generated ID
+            val newDocumentRef = workerCollection.document() // Create a new document reference
+            val workerWithId = worker.copy(id = newDocumentRef.id) // Copy worker with the new ID
+            newDocumentRef.set(workerWithId).await() // Use the new reference
+            newDocumentRef.id // Return the ID
+
         } catch (e: Exception) {
             Log.e("worker", "addWorker: $e ", )
             throw Exception("Failed to add worker: ${e.message}") // Wrap for more context
@@ -92,6 +94,7 @@ class WorkerRepository {
             val querySnapshot = workerCollection.get().await()
             val workers = mutableListOf<Worker>()
             for (document in querySnapshot.documents) {
+
                 val worker = document.toObject(Worker::class.java)
                 worker?.let { workers.add(it) } // handle null case.
             }
@@ -119,6 +122,22 @@ class WorkerRepository {
             return workers
         } catch (e: Exception) {
             throw Exception("Failed to get workers by health state: ${e.message}")
+        }
+    }
+
+    suspend fun deleteAllWorkers() {
+        try {
+            // Firestore does not have a direct method to delete a whole collection.
+            // The recommended way is to delete documents in batch.
+            val querySnapshot = workerCollection.get().await()
+            val batch = firestore.batch()
+
+            for (document in querySnapshot.documents) {
+                batch.delete(document.reference)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            throw Exception("Failed to delete all workers: ${e.message}")
         }
     }
 }
